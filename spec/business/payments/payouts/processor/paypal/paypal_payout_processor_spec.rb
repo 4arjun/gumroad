@@ -39,6 +39,8 @@ describe PaypalPayoutProcessor do
         expect(described_class.is_user_payable(user, 10_01)).to eq(true)
       end
 
+
+
       describe "when the user has a previous payout in processing state" do
         before do
           @payout1 = create(:payment, user:, txn_id: "dummy", processor_fee_cents: 10)
@@ -170,7 +172,6 @@ describe PaypalPayoutProcessor do
       create(:merchant_account_paypal, user:, charge_processor_merchant_id: "B66YJBBNCRW6L")
       expect(user.reload.has_valid_payout_info?).to eq true
     end
-  end
 
   describe "is_balance_payable" do
     describe "balance is associated with a Gumroad merchant account" do

@@ -38,6 +38,10 @@ class PaypalPayoutProcessor
     # Don't allow payout to PayPal if the StripePayoutProcessor can handle it.
     return false if StripePayoutProcessor.is_user_payable(user, amount_payable_usd_cents)
 
+    if is_user_from_blocked_country?(user)
+      return false
+    end
+
     payout_email = user.paypal_payout_email
 
     # User is payable on PayPal if they've provided an email address.
@@ -460,4 +464,69 @@ class PaypalPayoutProcessor
 
     topup_amount
   end
+
+  PAYPAL_BLOCKED_COUNTRY_CODES = [
+  Compliance::Countries::AUS.alpha2,
+  Compliance::Countries::AUT.alpha2,
+  Compliance::Countries::BEL.alpha2,
+  Compliance::Countries::BRA.alpha2,
+  Compliance::Countries::BGR.alpha2,
+  Compliance::Countries::CAN.alpha2,
+  Compliance::Countries::CIV.alpha2,
+  Compliance::Countries::HRV.alpha2,
+  Compliance::Countries::CYP.alpha2,
+  Compliance::Countries::CZE.alpha2,
+  Compliance::Countries::DNK.alpha2,
+  Compliance::Countries::EST.alpha2,
+  Compliance::Countries::FIN.alpha2,
+  Compliance::Countries::FRA.alpha2,
+  Compliance::Countries::DEU.alpha2,
+  Compliance::Countries::GHA.alpha2,
+  Compliance::Countries::GIB.alpha2,
+  Compliance::Countries::GRC.alpha2,
+  Compliance::Countries::HKG.alpha2,
+  Compliance::Countries::HUN.alpha2,
+  Compliance::Countries::IND.alpha2,
+  Compliance::Countries::IDN.alpha2,
+  Compliance::Countries::IRL.alpha2,
+  Compliance::Countries::ITA.alpha2,
+  Compliance::Countries::JPN.alpha2,
+  Compliance::Countries::KEN.alpha2,
+  Compliance::Countries::LVA.alpha2,
+  Compliance::Countries::LIE.alpha2,
+  Compliance::Countries::LTU.alpha2,
+  Compliance::Countries::LUX.alpha2,
+  Compliance::Countries::MYS.alpha2,
+  Compliance::Countries::MLT.alpha2,
+  Compliance::Countries::MEX.alpha2,  
+  Compliance::Countries::NLD.alpha2,
+  Compliance::Countries::NZL.alpha2,
+  Compliance::Countries::NGA.alpha2,
+  Compliance::Countries::NOR.alpha2,
+  Compliance::Countries::POL.alpha2,
+  Compliance::Countries::PRT.alpha2,
+  Compliance::Countries::ROU.alpha2,
+  Compliance::Countries::SGP.alpha2,
+  Compliance::Countries::SVK.alpha2,
+  Compliance::Countries::SVN.alpha2,
+  Compliance::Countries::ZAF.alpha2,
+  Compliance::Countries::ESP.alpha2,
+  Compliance::Countries::SWE.alpha2,
+  Compliance::Countries::CHE.alpha2,
+  Compliance::Countries::THA.alpha2,
+  Compliance::Countries::ARE.alpha2,
+  Compliance::Countries::GBR.alpha2,
+  Compliance::Countries::USA.alpha2,
+].freeze
+
+
+  def self.is_user_from_blocked_country?(user)
+    user_country_code = user.alive_user_compliance_info&.country_code ||
+                        (user.country.present? ? Compliance::Countries.find_by_name(user.country)&.alpha2 : nil)
+
+    return false if user_country_code.blank?
+
+    PAYPAL_BLOCKED_COUNTRY_CODES.include?(user_country_code)
+  end
+  private_class_method :is_user_from_blocked_country?
 end
