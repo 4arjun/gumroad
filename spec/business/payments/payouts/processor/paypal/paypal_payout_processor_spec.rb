@@ -172,6 +172,7 @@ describe PaypalPayoutProcessor do
       create(:merchant_account_paypal, user:, charge_processor_merchant_id: "B66YJBBNCRW6L")
       expect(user.reload.has_valid_payout_info?).to eq true
     end
+  end
 
   describe "is_balance_payable" do
     describe "balance is associated with a Gumroad merchant account" do
